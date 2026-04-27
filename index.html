@@ -476,6 +476,7 @@ function exportCSV() {
   if (selected.length === 0) { alert('No items selected. Add quantities first.'); return; }
 
   var customerName = document.getElementById('customerName').value.trim();
+  if (!customerName) { alert('Please enter a customer name before downloading.'); return; }
   var today = new Date().toISOString().slice(0,10);
   var rows = [];
 
