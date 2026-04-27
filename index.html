@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 Estimate Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', 'Segoe UI', sans-serif; background: #0c0f17; color: #e2e8f0; min-height: 100vh; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  .header { padding: 28px 32px 20px; border-bottom: 1px solid #1e293b; }
+  .header h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; color: #f8fafc; display: inline; }
+  .header .count { font-size: 13px; color: #64748b; font-family: 'JetBrains Mono', monospace; margin-left: 14px; }
+  .header p { font-size: 14px; color: #64748b; margin-top: 4px; }
+
+  .customer-bar { padding: 16px 32px; border-bottom: 1px solid #1e293b; background: #0e1220; display: flex; align-items: center; gap: 14px; }
+  .customer-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: #64748b; white-space: nowrap; }
+  .customer-input {
+    flex: 1; max-width: 400px; padding: 8px 14px; border-radius: 6px;
+    border: 1.5px solid #1e293b; background: #0c0f17; color: #f8fafc;
+    font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none;
+    transition: border-color 0.15s ease;
+  }
+  .customer-input:focus { border-color: #3b82f6; }
+  .customer-input::placeholder { color: #475569; }
+
+  .filters { padding: 20px 32px; border-bottom: 1px solid #1e293b; background: #0e1220; }
+  .filter-group { margin-bottom: 16px; }
+  .filter-group:last-of-type { margin-bottom: 0; }
+  .filter-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: #64748b; margin-bottom: 8px; }
+  .filter-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    padding: 8px 18px; border-radius: 8px; border: 1.5px solid #1e293b;
+    background: transparent; color: #94a3b8; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s ease; font-family: 'DM Sans', sans-serif;
+    user-select: none;
+  }
+  .chip:hover { border-color: #334155; color: #cbd5e1; }
+  .chip.active { font-weight: 600; }
+  .clear-btn {
+    margin-top: 12px; padding: 6px 14px; border-radius: 6px; border: 1px solid #334155;
+    background: transparent; color: #94a3b8; font-size: 12px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; display: none;
+  }
+  .clear-btn.show { display: inline-block; }
+  .clear-btn:hover { border-color: #475569; color: #cbd5e1; }
+
+  .summary {
+    padding: 14px 32px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-bottom: 1px solid #334155; display: none; align-items: center;
+    justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+  .summary.show { display: flex; }
+  .summary-metrics { display: flex; gap: 24px; align-items: center; }
+  .summary-metric-label { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+  .summary-metric-value { font-size: 20px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .summary-divider { width: 1px; height: 36px; background: #334155; }
+  .summary-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .reset-btn {
+    padding: 8px 16px; border-radius: 6px; border: 1px solid #475569;
+    background: transparent; color: #94a3b8; font-size: 12px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .reset-btn:hover { border-color: #64748b; color: #cbd5e1; }
+  .export-btn {
+    padding: 8px 16px; border-radius: 6px; font-size: 12px;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600;
+    transition: all 0.15s ease; display: flex; align-items: center; gap: 6px;
+    border: 1px solid #3b82f6; background: rgba(59,130,246,0.12); color: #93c5fd;
+  }
+  .export-btn:hover { background: rgba(59,130,246,0.22); color: #bfdbfe; }
+  .export-btn svg { width: 14px; height: 14px; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    padding: 14px 16px; text-align: left; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1.2px; color: #64748b;
+    background: #0c0f17; position: sticky; top: 0; z-index: 2;
+    border-bottom: 2px solid #1e293b;
+  }
+  thead th.right { text-align: right; }
+  thead th.center { text-align: center; }
+  tbody tr { border-bottom: 1px solid #1e293b; transition: background 0.1s ease; }
+  tbody tr:hover { background: #1e293b40 !important; }
+  tbody tr.has-qty { background: rgba(59,130,246,0.03) !important; }
+  tbody tr.auto-qty { background: rgba(250,204,21,0.04) !important; }
+  tbody tr.even { background: transparent; }
+  tbody tr.odd { background: #0e1220; }
+  td { padding: 12px 16px; vertical-align: top; }
+  td.right { text-align: right; }
+  td.center { text-align: center; }
+  .product-name { font-weight: 500; color: #e2e8f0; line-height: 1.4; }
+  .product-name.active { color: #93c5fd; }
+  .product-name.auto-active { color: #fbbf24; }
+
+  .note-col { color: #fbbf24; font-size: 12px; line-height: 1.5; max-width: 220px; }
+  .action-col { color: #94a3b8; font-size: 12px; line-height: 1.5; max-width: 260px; }
+
+  .tags { display: flex; gap: 4px; flex-wrap: wrap; }
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 500; white-space: nowrap;
+  }
+
+  .qty-controls { display: flex; align-items: center; justify-content: center; gap: 2px; }
+  .qty-btn {
+    width: 28px; height: 28px; border-radius: 4px; border: 1px solid #334155;
+    background: transparent; color: #94a3b8; cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif;
+  }
+  .qty-btn:disabled { opacity: 0.3; cursor: default; }
+  .qty-btn:hover:not(:disabled) { border-color: #475569; color: #cbd5e1; }
+  .qty-input {
+    width: 40px; height: 28px; text-align: center; border-radius: 4px;
+    border: 1px solid #334155; background: #0c0f17; color: #94a3b8;
+    font-size: 13px; font-family: 'JetBrains Mono', monospace; font-weight: 600;
+    outline: none;
+  }
+  .qty-input.active { border-color: #3b82f6; background: rgba(59,130,246,0.06); color: #93c5fd; }
+  .qty-input.auto { border-color: #fbbf24; background: rgba(250,204,21,0.08); color: #fbbf24; }
+  .qty-input:focus { border-color: #3b82f6; }
+
+  .auto-badge {
+    display: inline-block; font-size: 10px; font-weight: 600; color: #fbbf24;
+    background: rgba(250,204,21,0.12); border: 1px solid rgba(250,204,21,0.25);
+    padding: 1px 6px; border-radius: 4px; margin-left: 6px; letter-spacing: 0.5px;
+    vertical-align: middle;
+  }
+  .auto-sources { font-size: 11px; color: #a78bfa; margin-top: 3px; line-height: 1.3; }
+
+  .empty { padding: 60px 32px; text-align: center; color: #475569; display: none; }
+  .empty.show { display: block; }
+  .empty .icon { font-size: 40px; margin-bottom: 12px; }
+  .empty .title { font-size: 15px; font-weight: 500; }
+  .empty .subtitle { font-size: 13px; margin-top: 4px; }
+
+  @media (max-width: 768px) {
+    .header, .filters, .summary, .customer-bar { padding-left: 16px; padding-right: 16px; }
+    .summary-metrics { gap: 12px; }
+    .summary-metric-value { font-size: 16px; }
+    td, thead th { padding: 10px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>2026 Estimate Builder</h1>
+  <span class="count mono" id="itemCount"></span>
+  <p>Select an install type and bundle, then set quantities. Changing filters resets quantities. Linked items auto-include.</p>
+</div>
+
+<div class="customer-bar">
+  <label class="customer-label" for="customerName">Customer Name</label>
+  <input type="text" class="customer-input" id="customerName" placeholder="Enter customer name for estimate...">
+</div>
+
+<div class="filters">
+  <div class="filter-group">
+    <div class="filter-label">Install Type</div>
+    <div class="filter-chips" id="installChips"></div>
+  </div>
+  <div class="filter-group">
+    <div class="filter-label">Bundle</div>
+    <div class="filter-chips" id="bundleChips"></div>
+  </div>
+  <button class="clear-btn" id="clearBtn" onclick="clearFilters()">Clear all filters</button>
+</div>
+
+<div class="summary" id="summary">
+  <div class="summary-metrics">
+    <div>
+      <div class="summary-metric-label">Items Selected</div>
+      <div class="summary-metric-value mono" id="sumCount" style="color:#f8fafc">0</div>
+    </div>
+    <div class="summary-divider"></div>
+    <div>
+      <div class="summary-metric-label">Monthly Total</div>
+      <div class="summary-metric-value mono" id="sumMonthly" style="color:#3b82f6">$0.00</div>
+    </div>
+    <div class="summary-divider"></div>
+    <div>
+      <div class="summary-metric-label">Total Cost</div>
+      <div class="summary-metric-value mono" id="sumCost" style="color:#22c55e">$0.00</div>
+    </div>
+  </div>
+  <div class="summary-actions">
+    <button class="export-btn" onclick="exportCSV()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Download Estimate CSV
+    </button>
+    <button class="reset-btn" onclick="resetQuantities()">Reset</button>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Product / Service</th>
+        <th>SKU</th>
+        <th class="right">Price</th>
+        <th class="right">Cost</th>
+        <th>Install Type</th>
+        <th>Bundle</th>
+        <th>Estimate Note</th>
+        <th>MyAdmin Order Action</th>
+        <th class="center">Qty</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<div class="empty" id="emptyState">
+  <div class="icon">&#8709;</div>
+  <div class="title">No items match this filter combination</div>
+  <div class="subtitle">Try selecting a different install type or bundle</div>
+</div>
+
+<script>
+var DATA = [
+  { product: "2026 - MRT - GO Core Plan Bundle", sku: "2601", price: 14.95, cost: 8, installType: "Self Install", bundle: "Core", estimateNote: "", myadminAction: "Order on Core Plan w/ BUNDLE-GO Promo" },
+  { product: "2026 - MRT - GO Core Plan Bundle - USAFS INSTALLED", sku: "2602", price: 16.95, cost: 8, installType: "USAFS (install not ordered from GT)", bundle: "Core", estimateNote: "Include 2630 (INS-GOSTD)", myadminAction: "Order on Core Plan w/ BUNDLE-GO Promo ***DO NOT include Install in Order" },
+  { product: "2026 - MRT - GO Core Plan Bundle - Geotab INSTALLED", sku: "2603", price: 16.95, cost: 10, installType: "Geotab (Install ordered)", bundle: "Core", estimateNote: "Include 2630 (INS-GOSTD)", myadminAction: "Order on Core Plan w/ BUNDLE-GO-INS Promo *include INS-GOSTD in order" },
+  { product: "2026 - MRT - GO Plan Bundle", sku: "2604", price: 28.95, cost: 16, installType: "Self Install", bundle: "Go", estimateNote: "", myadminAction: "Order on Go Plan w/ BUNDLE-GO Promo" },
+  { product: "2026 - MRT - GO Plan Bundle - USAFS INSTALLED", sku: "2605", price: 30.95, cost: 16, installType: "USAFS (install not ordered from GT)", bundle: "Go", estimateNote: "Include 2630 (INS-GOSTD)", myadminAction: "Order on Go Plan w/ BUNDLE-GO Promo ***DO NOT include Install in Order" },
+  { product: "2026 - MRT - GO Plan Bundle - Geotab INSTALLED", sku: "2606", price: 30.95, cost: 18, installType: "Geotab (Install ordered)", bundle: "Go", estimateNote: "Include 2630 (INS-GOSTD)", myadminAction: "Order on Go Plan w/ BUNDLE-GO-INS Promo *include INS-GOSTD in order" },
+  { product: "2026 - MRT - GO with Safety Bundle", sku: "2607", price: 28.95, cost: 16, installType: "Self Install", bundle: "Safety (Sensor)", estimateNote: "", myadminAction: "Order on Go Plan w/ BUNDLE-GOGF Promo" },
+  { product: "2026 - MRT - Upgrade Existing GO9s with Safety Bundle", sku: "2608", price: 28.95, cost: 16, installType: "Self Install", bundle: "Safety (Sensor)", estimateNote: "", myadminAction: "Identify existing Go9's that will have GF added and Apply BUNDLE-GOGF promo" },
+  { product: "2026 - MRT - GF with Safety Bundle", sku: "2609", price: 11.95, cost: 4, installType: "Self Install", bundle: "Safety (Sensor)", estimateNote: "", myadminAction: "Order on Go Plan w/ BUNDLE-GOGF Promo" },
+  { product: "2026 - MRT - GO with Safety Bundle - USAFS INSTALLED", sku: "2610", price: 28.95, cost: 16, installType: "USAFS (install not ordered from GT)", bundle: "Safety (Sensor)", estimateNote: "Include 2630 (INS-GOSTD)", myadminAction: "Order on Go Plan w/ BUNDLE-GOGF Promo ***DO NOT include Install in Order" },
+  { product: "2026 - MRT - Upgrade Existing GO9s with Safety Bundle - USAFS INSTALLED", sku: "2611", price: 28.95, cost: 16, installType: "USAFS (install not ordered from GT)", bundle: "Safety (Sensor)", estimateNote: "", myadminAction: "Identify existing Go9's that will have GF added and Apply BUNDLE-GOGF promo" },
+  { product: "2026 - MRT - GF with Safety Bundle - USAFS INSTALLED", sku: "2612", price: 11.95, cost: 4, installType: "USAFS (install not ordered from GT)", bundle: "Safety (Sensor)", estimateNote: "Include 2632 (INS-CAMERA)", myadminAction: "Order on Go Plan w/ BUNDLE-GOGF Promo ***DO NOT include Install in Order" },
+  { product: "2026 - MRT - GO with Safety Bundle - Geotab INSTALLED", sku: "2613", price: 28.95, cost: 18, installType: "Geotab (Install ordered)", bundle: "Safety (Sensor)", estimateNote: "Include 2630 (INS-GOSTD)", myadminAction: "Order on Go Plan w/ BUNDLE-GOGF-INS Promo *include INS-GOSTD in order" },
+  { product: "2026 - MRT - Upgrade Existing GO9s with Safety Bundle - Geotab INSTALLED", sku: "2614", price: 28.95, cost: 18, installType: "Geotab (Install ordered)", bundle: "Safety (Sensor)", estimateNote: "", myadminAction: "Identify existing Go9's that will have GF added and Apply BUNDLE-GOGF-INS promo" },
+  { product: "2026 - MRT - GF with Safety Bundle - Geotab INSTALLED", sku: "2615", price: 11.95, cost: 6, installType: "Geotab (Install ordered)", bundle: "Safety (Sensor)", estimateNote: "Include 2632 (INS-CAMERA)", myadminAction: "Order on Go Plan w/ BUNDLE-GOGF-INS Promo *include INS-CAMERA in order" },
+  { product: "2026 - MRT - GO with Safety Plus Bundle", sku: "2616", price: 28.95, cost: 16, installType: "Self Install", bundle: "Safety Plus (Camera)", estimateNote: "", myadminAction: "Order on Go Plan w/ BUNDLE-GOGFP Promo" },
+  { product: "2026 - MRT - Upgrade Existing GO9s with Safety Plus Bundle", sku: "2617", price: 28.95, cost: 16, installType: "Self Install", bundle: "Safety Plus (Camera)", estimateNote: "", myadminAction: "Identify existing Go9's that will have GFP added and Apply BUNDLE-GOGFP promo" },
+  { product: "2026 - MRT - GFP with Safety Plus Bundle", sku: "2618", price: 16.95, cost: 9, installType: "Self Install", bundle: "Safety Plus (Camera)", estimateNote: "", myadminAction: "Order on Go Plan w/ BUNDLE-GOGFP Promo" },
+  { product: "2026 - MRT - GO with Safety Plus Bundle - USAFS INSTALLED", sku: "2619", price: 28.95, cost: 16, installType: "USAFS (install not ordered from GT)", bundle: "Safety Plus (Camera)", estimateNote: "Include 2630 (INS-GOSTD)", myadminAction: "Order on Go Plan w/ BUNDLE-GOGFP Promo ***DO NOT include Install in Order" },
+  { product: "2026 - MRT - Upgrade Existing GO9s with Safety Plus Bundle - USAFS INSTALLED", sku: "2620", price: 28.95, cost: 16, installType: "USAFS (install not ordered from GT)", bundle: "Safety Plus (Camera)", estimateNote: "", myadminAction: "Identify existing Go9's that will have GFP added and Apply BUNDLE-GOGFP promo" },
+  { product: "2026 - MRT - GFP with Safety Plus Bundle - USAFS INSTALLED", sku: "2621", price: 20.95, cost: 9, installType: "USAFS (install not ordered from GT)", bundle: "Safety Plus (Camera)", estimateNote: "Include 2632 (INS-CAMERA)", myadminAction: "Order on Go Plan w/ BUNDLE-GOGFP Promo ***DO NOT include Install in Order" },
+  { product: "2026 - MRT - GO with Safety Plus Bundle - Geotab INSTALLED", sku: "2622", price: 28.95, cost: 18, installType: "Geotab (Install ordered)", bundle: "Safety Plus (Camera)", estimateNote: "Include 2630 (INS-GOSTD)", myadminAction: "Order on Go Plan w/ BUNDLE-GOGFP-INS Promo *include INS-GOSTD in order" },
+  { product: "2026 - MRT - Upgrade Existing GO9s with Safety Plus Bundle - Geotab INSTALLED", sku: "2623", price: 28.95, cost: 18, installType: "Geotab (Install ordered)", bundle: "Safety Plus (Camera)", estimateNote: "", myadminAction: "Identify existing Go9's that will have GFP added and Apply BUNDLE-GOGFP-INS promo" },
+  { product: "2026 - MRT - GFP with Safety Plus Bundle - Geotab INSTALLED", sku: "2624", price: 20.95, cost: 11, installType: "Geotab (Install ordered)", bundle: "Safety Plus (Camera)", estimateNote: "Include 2632 (INS-CAMERA)", myadminAction: "Order on Go Plan w/ BUNDLE-GOGFP-INS Promo *include INS-CAMERA in order" },
+  { product: "2026 GO9-LTMB1VZW - BUNDLED", sku: "2625", price: 0, cost: 0, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Core, Go, Safety (Sensor), Safety Plus (Camera)", estimateNote: "Include Harness", myadminAction: "" },
+  { product: "2026 GO9-LTMB1ATT - BUNDLED", sku: "2626", price: 0, cost: 0, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Core, Go, Safety (Sensor), Safety Plus (Camera)", estimateNote: "Include Harness", myadminAction: "" },
+  { product: "2026 GO Focus Safety Sensor - BUNDLED", sku: "2627", price: 0, cost: 0, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Safety (Sensor)", estimateNote: "", myadminAction: "" },
+  { product: "2026 GO Focus Plus Camera - BUNDLED", sku: "2628", price: 0, cost: 0, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Safety Plus (Camera)", estimateNote: "", myadminAction: "" },
+  { product: "2026 External Auxiliary Rear Camera - BUNDLED", sku: "2629", price: null, cost: 306, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Safety Plus (Camera)", estimateNote: "", myadminAction: "" },
+  { product: "2026 INS-GOSTRD - BUNDLED", sku: "2630", price: 0, cost: null, installType: "USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Core, Go, Safety (Sensor), Safety Plus (Camera)", estimateNote: "Include for all USAFS & Geotab Installed Go Devices", myadminAction: "Only include for BUNDLE-XX-INS Promos" },
+  { product: "2026 INS-GOADV - BUNDLED", sku: "2631", price: 0, cost: 0, installType: "Null", bundle: "Null", estimateNote: "", myadminAction: "" },
+  { product: "2026 INS-CAMERA - BUNDLED", sku: "2632", price: 0, cost: 0, installType: "USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Safety (Sensor), Safety Plus (Camera)", estimateNote: "Include for all USAFS & Geotab Installed Sensors/Cameras", myadminAction: "Only include for BUNDLE-XX-INS Promos" },
+  { product: "3-Wire Harness - BUNDLED", sku: "HRN-CW03K3-A", price: 0, cost: 0, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Core, Go, Safety (Sensor), Safety Plus (Camera)", estimateNote: "", myadminAction: "" },
+  { product: "6-Pin Harness - BUNDLED", sku: "HRN-DS06T2-A", price: 0, cost: 0, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Core, Go, Safety (Sensor), Safety Plus (Camera)", estimateNote: "", myadminAction: "" },
+  { product: "9-Pin Harness - BUNDLED", sku: "HRN-GS09K2-A", price: 0, cost: 0, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Core, Go, Safety (Sensor), Safety Plus (Camera)", estimateNote: "", myadminAction: "" },
+  { product: "16-Pin OBDII Harness - BUNDLED", sku: "HRN-GS16K22-A", price: 0, cost: 0, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Core, Go, Safety (Sensor), Safety Plus (Camera)", estimateNote: "", myadminAction: "" }
+];
+
+var INCLUDE_LINKS = {};
+var REVERSE_MAP = {};
+DATA.forEach(function(item) {
+  var m = item.estimateNote.match(/^Include (\d{4})\b/);
+  if (m) {
+    var targetSku = m[1];
+    INCLUDE_LINKS[item.sku] = targetSku;
+    if (!REVERSE_MAP[targetSku]) REVERSE_MAP[targetSku] = [];
+    REVERSE_MAP[targetSku].push(item.sku);
+  }
+});
+
+var INSTALL_TYPES = ["Self Install", "USAFS (install not ordered from GT)", "Geotab (Install ordered)"];
+var BUNDLES = ["Core", "Go", "Safety (Sensor)", "Safety Plus (Camera)"];
+var INSTALL_SHORT = { "Self Install": "Self Install", "USAFS (install not ordered from GT)": "USAFS", "Geotab (Install ordered)": "Geotab" };
+var INSTALL_COLORS = {
+  "Self Install": { accent: "#8b5cf6", bg: "rgba(139,92,246,0.12)", border: "rgba(139,92,246,0.19)" },
+  "USAFS (install not ordered from GT)": { accent: "#06b6d4", bg: "rgba(6,182,212,0.12)", border: "rgba(6,182,212,0.19)" },
+  "Geotab (Install ordered)": { accent: "#eab308", bg: "rgba(234,179,8,0.12)", border: "rgba(234,179,8,0.19)" }
+};
+var BUNDLE_COLORS = {
+  "Core": { accent: "#3b82f6", bg: "rgba(59,130,246,0.12)", border: "rgba(59,130,246,0.19)" },
+  "Go": { accent: "#22c55e", bg: "rgba(34,197,94,0.12)", border: "rgba(34,197,94,0.19)" },
+  "Safety (Sensor)": { accent: "#f97316", bg: "rgba(249,115,22,0.12)", border: "rgba(249,115,22,0.19)" },
+  "Safety Plus (Camera)": { accent: "#ec4899", bg: "rgba(236,72,153,0.12)", border: "rgba(236,72,153,0.19)" }
+};
+
+var installFilter = null;
+var bundleFilter = null;
+var quantities = {};
+var autoQuantities = {};
+
+function init() { renderChips(); render(); }
+
+function renderChips() {
+  document.getElementById('installChips').innerHTML = INSTALL_TYPES.map(function(t) {
+    return '<button class="chip" data-type="install" data-value="' + t + '" onclick="toggleInstall(\'' + t + '\')">' + INSTALL_SHORT[t] + '</button>';
+  }).join('');
+  document.getElementById('bundleChips').innerHTML = BUNDLES.map(function(b) {
+    return '<button class="chip" data-type="bundle" data-value="' + b + '" onclick="toggleBundle(\'' + b.replace(/'/g, "\\'") + '\')">' + b + '</button>';
+  }).join('');
+}
+
+function toggleInstall(val) {
+  installFilter = installFilter === val ? null : val;
+  quantities = {};
+  updateChipStyles(); render();
+}
+function toggleBundle(val) {
+  bundleFilter = bundleFilter === val ? null : val;
+  quantities = {};
+  updateChipStyles(); render();
+}
+function clearFilters() {
+  installFilter = null; bundleFilter = null;
+  quantities = {};
+  updateChipStyles(); render();
+}
+
+function updateChipStyles() {
+  document.querySelectorAll('.chip[data-type="install"]').forEach(function(el) {
+    var val = el.dataset.value, active = installFilter === val, c = INSTALL_COLORS[val];
+    el.classList.toggle('active', active);
+    el.style.borderColor = active ? c.accent : '#1e293b';
+    el.style.background = active ? c.bg : 'transparent';
+    el.style.color = active ? c.accent : '#94a3b8';
+    el.innerHTML = INSTALL_SHORT[val] + (active ? ' <span style="margin-left:8px;opacity:0.6">\u2715</span>' : '');
+  });
+  document.querySelectorAll('.chip[data-type="bundle"]').forEach(function(el) {
+    var val = el.dataset.value, active = bundleFilter === val, c = BUNDLE_COLORS[val];
+    el.classList.toggle('active', active);
+    el.style.borderColor = active ? c.accent : '#1e293b';
+    el.style.background = active ? c.bg : 'transparent';
+    el.style.color = active ? c.accent : '#94a3b8';
+    el.innerHTML = val + (active ? ' <span style="margin-left:8px;opacity:0.6">\u2715</span>' : '');
+  });
+  document.getElementById('clearBtn').classList.toggle('show', !!(installFilter || bundleFilter));
+}
+
+function matchesFilter(cellValue, filterValue) {
+  if (!cellValue) return false;
+  return cellValue.split(', ').map(function(s) { return s.trim(); }).indexOf(filterValue) !== -1;
+}
+
+function getFiltered() {
+  return DATA.filter(function(item) {
+    if (item.installType === 'Null' && item.bundle === 'Null') return false;
+    var im = !installFilter || matchesFilter(item.installType, installFilter);
+    var bm = !bundleFilter || matchesFilter(item.bundle, bundleFilter);
+    return im && bm;
+  });
+}
+
+function recalcAutoQuantities() {
+  autoQuantities = {};
+  for (var targetSku in REVERSE_MAP) {
+    var total = 0, sourceDetails = [];
+    REVERSE_MAP[targetSku].forEach(function(srcSku) {
+      var q = quantities[srcSku] || 0;
+      if (q > 0) { total += q; sourceDetails.push({ sku: srcSku, qty: q }); }
+    });
+    if (total > 0) autoQuantities[targetSku] = { total: total, sources: sourceDetails };
+  }
+}
+
+function getEffectiveQty(sku) {
+  return (quantities[sku] || 0) + (autoQuantities[sku] ? autoQuantities[sku].total : 0);
+}
+
+function makeTags(value, colorMap, shortMap) {
+  return value.split(', ').map(function(s) { return s.trim(); }).filter(function(s) { return s && s !== 'Null'; }).map(function(v) {
+    var c = colorMap[v]; if (!c) return '';
+    var label = shortMap ? (shortMap[v] || v) : v;
+    return '<span class="tag" style="background:' + c.bg + ';color:' + c.accent + ';border:1px solid ' + c.border + '">' + label + '</span>';
+  }).join('');
+}
+
+function esc(str) { if (!str) return ''; var d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+function render() {
+  recalcAutoQuantities();
+  var filtered = getFiltered();
+  document.getElementById('itemCount').textContent = filtered.length + ' items';
+  var tbody = document.getElementById('tableBody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    document.getElementById('emptyState').classList.add('show');
+  } else {
+    document.getElementById('emptyState').classList.remove('show');
+    tbody.innerHTML = filtered.map(function(item, idx) {
+      var manualQty = quantities[item.sku] || 0;
+      var autoInfo = autoQuantities[item.sku];
+      var autoQty = autoInfo ? autoInfo.total : 0;
+      var effectiveQty = manualQty + autoQty;
+      var hasQty = manualQty > 0;
+      var hasAutoQty = autoQty > 0;
+      var rowClass = hasAutoQty ? 'auto-qty' : (hasQty ? 'has-qty' : (idx % 2 === 0 ? 'even' : 'odd'));
+      var badge = hasAutoQty ? '<span class="auto-badge">AUTO ' + autoQty + '</span>' : '';
+      var autoSrcHtml = '';
+      if (hasAutoQty) {
+        var srcLines = autoInfo.sources.map(function(s) { return s.qty + '\u00d7 from SKU ' + s.sku; });
+        autoSrcHtml = '<div class="auto-sources">\u2197 ' + srcLines.join(', ') + '</div>';
+      }
+      var nameClass = hasAutoQty ? 'auto-active' : (hasQty ? 'active' : '');
+      var inputClass = hasAutoQty ? 'auto' : (hasQty ? 'active' : '');
+      var isReadonly = hasAutoQty && manualQty === 0;
+      var noteHtml = item.estimateNote ? esc(item.estimateNote) : '<span style="color:#334155">\u2014</span>';
+      var actionHtml = item.myadminAction ? esc(item.myadminAction) : '<span style="color:#334155">\u2014</span>';
+
+      return '<tr class="' + rowClass + '">' +
+        '<td><div class="product-name ' + nameClass + '">' + esc(item.product) + badge + '</div>' + autoSrcHtml + '</td>' +
+        '<td class="mono" style="color:#64748b;font-size:12px">' + esc(item.sku) + '</td>' +
+        '<td class="right mono" style="font-weight:500;color:' + (item.price ? '#e2e8f0' : '#475569') + '">' + (item.price != null ? '$' + item.price.toFixed(2) : '\u2014') + '</td>' +
+        '<td class="right mono" style="font-size:12px;color:#64748b">' + (item.cost != null ? '$' + item.cost : '\u2014') + '</td>' +
+        '<td><div class="tags">' + makeTags(item.installType, INSTALL_COLORS, INSTALL_SHORT) + '</div></td>' +
+        '<td><div class="tags">' + makeTags(item.bundle, BUNDLE_COLORS, null) + '</div></td>' +
+        '<td><div class="note-col">' + noteHtml + '</div></td>' +
+        '<td><div class="action-col">' + actionHtml + '</div></td>' +
+        '<td class="center"><div class="qty-controls">' +
+          '<button class="qty-btn" onclick="changeQty(\'' + item.sku + '\', -1)"' + (manualQty === 0 ? ' disabled' : '') + '>\u2212</button>' +
+          '<input type="text" class="qty-input ' + inputClass + '" value="' + (effectiveQty || '') + '" placeholder="0"' +
+            (isReadonly ? ' readonly title="Auto-included from linked items"' : '') +
+            ' oninput="handleInput(\'' + item.sku + '\', this.value, ' + autoQty + ')" id="qty-' + item.sku + '">' +
+          '<button class="qty-btn" onclick="changeQty(\'' + item.sku + '\', 1)">+</button>' +
+        '</div></td></tr>';
+    }).join('');
+  }
+  updateSummary(filtered);
+}
+
+function handleInput(sku, rawVal, autoQty) {
+  var total = parseInt(rawVal) || 0;
+  quantities[sku] = Math.max(0, total - autoQty);
+  render();
+  var input = document.getElementById('qty-' + sku);
+  if (input && !input.readOnly) { input.focus(); input.setSelectionRange(input.value.length, input.value.length); }
+}
+
+function changeQty(sku, delta) {
+  quantities[sku] = Math.max(0, (quantities[sku] || 0) + delta);
+  render();
+}
+
+function resetQuantities() { quantities = {}; render(); }
+
+function updateSummary(filtered) {
+  var items = filtered.filter(function(i) { return getEffectiveQty(i.sku) > 0; });
+  var summary = document.getElementById('summary');
+  if (items.length === 0) { summary.classList.remove('show'); return; }
+  summary.classList.add('show');
+  var totalCount = 0, totalMonthly = 0, totalCost = 0;
+  items.forEach(function(i) {
+    var eq = getEffectiveQty(i.sku);
+    totalCount += eq; totalMonthly += (i.price || 0) * eq; totalCost += (i.cost || 0) * eq;
+  });
+  document.getElementById('sumCount').textContent = totalCount;
+  document.getElementById('sumMonthly').textContent = '$' + totalMonthly.toFixed(2);
+  document.getElementById('sumCost').textContent = '$' + totalCost.toFixed(2);
+}
+
+function csvEscape(val) {
+  if (val == null) return '';
+  var s = String(val);
+  if (s.indexOf(',') !== -1 || s.indexOf('"') !== -1 || s.indexOf('\n') !== -1) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+function exportCSV() {
+  recalcAutoQuantities();
+  var selected = DATA.filter(function(i) { return getEffectiveQty(i.sku) > 0; });
+  if (selected.length === 0) { alert('No items selected. Add quantities first.'); return; }
+
+  var customerName = document.getElementById('customerName').value.trim();
+  var today = new Date().toISOString().slice(0,10);
+  var rows = [];
+
+  // Customer name header row
+  if (customerName) {
+    rows.push('Customer:,' + csvEscape(customerName));
+    rows.push('Date:,' + today);
+    rows.push('Install Type:,' + csvEscape(installFilter ? INSTALL_SHORT[installFilter] || installFilter : 'All'));
+    rows.push('Bundle:,' + csvEscape(bundleFilter || 'All'));
+    rows.push('');
+  }
+
+  var headers = ['SKU','Product/Service','Qty','Sales Price/Rate','Monthly Ext','Install Type','Bundle','Estimate Note','MyAdmin Order Action'];
+  rows.push(headers.join(','));
+
+  selected.forEach(function(item) {
+    var eq = getEffectiveQty(item.sku);
+    var monthlyExt = (item.price || 0) * eq;
+
+    var installs = item.installType.split(', ').map(function(s) { return s.trim(); });
+    var installLabel = installFilter && installs.indexOf(installFilter) !== -1
+      ? (INSTALL_SHORT[installFilter] || installFilter)
+      : (INSTALL_SHORT[installs[0]] || installs[0]);
+
+    var bundles = item.bundle.split(', ').map(function(s) { return s.trim(); });
+    var bundleLabel = bundleFilter && bundles.indexOf(bundleFilter) !== -1
+      ? bundleFilter : bundles[0];
+
+    rows.push([
+      csvEscape(item.sku),
+      csvEscape(item.product),
+      eq,
+      item.price != null ? item.price.toFixed(2) : 0,
+      monthlyExt.toFixed(2),
+      csvEscape(installLabel),
+      csvEscape(bundleLabel),
+      csvEscape(item.estimateNote),
+      csvEscape(item.myadminAction)
+    ].join(','));
+  });
+
+  var csvContent = '\uFEFF' + rows.join('\r\n');
+  var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var safeName = customerName ? customerName.replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') : '';
+  var filename = safeName
+    ? '2026_Estimate_' + safeName + '_' + today + '.csv'
+    : '2026_Estimate_' + today + '.csv';
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+init();
+</script>
+</body>
+</html>
