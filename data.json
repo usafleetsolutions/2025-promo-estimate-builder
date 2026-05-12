@@ -1,0 +1,347 @@
+[
+  {
+    "product": "2026 - MRT - GO Core Plan Bundle",
+    "sku": "2601",
+    "price": 14.95,
+    "installType": "Self Install",
+    "bundle": "Core",
+    "myadminAction": "Order on Core Plan w/ BUNDLE-GO Promo"
+  },
+  {
+    "product": "2026 - MRT - GO Core Plan Bundle - USAFS INSTALLED",
+    "sku": "2602",
+    "price": 16.95,
+    "installType": "USAFS (install not ordered from GT)",
+    "bundle": "Core",
+    "estimateNote": "Include 2636 (INS-GOSTD)",
+    "myadminAction": "Order on Core Plan w/ BUNDLE-GO Promo ***DO NOT include Install in Order"
+  },
+  {
+    "product": "2026 - MRT - GO Core Plan Bundle - Geotab INSTALLED",
+    "sku": "2603",
+    "price": 16.95,
+    "installType": "Geotab (Install ordered)",
+    "bundle": "Core",
+    "estimateNote": "Include 2636 (INS-GOSTD)",
+    "myadminAction": "Order on Core Plan w/ BUNDLE-GO-INS Promo *include INS-GOSTD in order"
+  },
+  {
+    "product": "2026 - MRT - GO Plan Bundle",
+    "sku": "2604",
+    "price": 28.95,
+    "installType": "Self Install",
+    "bundle": "Go",
+    "myadminAction": "Order on Go Plan w/ BUNDLE-GO Promo"
+  },
+  {
+    "product": "2026 - MRT - GO Plan Bundle - USAFS INSTALLED",
+    "sku": "2605",
+    "price": 30.95,
+    "installType": "USAFS (install not ordered from GT)",
+    "bundle": "Go",
+    "estimateNote": "Include 2636 (INS-GOSTD)",
+    "myadminAction": "Order on Go Plan w/ BUNDLE-GO Promo ***DO NOT include Install in Order"
+  },
+  {
+    "product": "2026 - MRT - GO Plan Bundle - Geotab INSTALLED",
+    "sku": "2606",
+    "price": 30.95,
+    "installType": "Geotab (Install ordered)",
+    "bundle": "Go",
+    "estimateNote": "Include 2636 (INS-GOSTD)",
+    "myadminAction": "Order on Go Plan w/ BUNDLE-GO-INS Promo *include INS-GOSTD in order"
+  },
+  {
+    "product": "2026 - MRT - GO with Safety Bundle",
+    "sku": "2607",
+    "price": 28.95,
+    "installType": "Self Install",
+    "bundle": "Safety (Sensor)",
+    "myadminAction": "Order on Go Plan w/ BUNDLE-GOGF Promo"
+  },
+  {
+    "product": "2026 - MRT - Upgrade Existing GO9Bs with Safety Bundle",
+    "sku": "2608",
+    "price": 28.95,
+    "installType": "Self Install",
+    "bundle": "Safety (Sensor)",
+    "myadminAction": "Identify existing Go9's that will have GF added and Apply BUNDLE-GOGF promo"
+  },
+  {
+    "product": "2026 - MRT - Replace GO8/GO9's with Safety Bundle",
+    "sku": "2609",
+    "price": 28.95,
+    "installType": "Self Install",
+    "bundle": "Safety (Sensor)",
+    "myadminAction": "For Go's that will be replaced. Make Note to terminate replaced devices after swap is complete. Order new Go9B's on Go w/ BUNDLE-GOGF promo"
+  },
+  {
+    "product": "2026 - MRT - GF with Safety Bundle",
+    "sku": "2610",
+    "price": 11.95,
+    "installType": "Self Install",
+    "bundle": "Safety (Sensor)",
+    "myadminAction": "Order on Go Plan w/ BUNDLE-GOGF Promo"
+  },
+  {
+    "product": "2026 - MRT - GO with Safety Bundle - USAFS INSTALLED",
+    "sku": "2611",
+    "price": 28.95,
+    "installType": "USAFS (install not ordered from GT)",
+    "bundle": "Safety (Sensor)",
+    "estimateNote": "Include 2636 (INS-GOSTD)",
+    "myadminAction": "Order on Go Plan w/ BUNDLE-GOGF Promo ***DO NOT include Install in Order"
+  },
+  {
+    "product": "2026 - MRT - Upgrade Existing GO9Bs with Safety Bundle - USAFS INSTALLED",
+    "sku": "2612",
+    "price": 28.95,
+    "installType": "USAFS (install not ordered from GT)",
+    "bundle": "Safety (Sensor)",
+    "myadminAction": "Identify existing Go9's that will have GF added and Apply BUNDLE-GOGF promo"
+  },
+  {
+    "product": "2026 - MRT - Replace GO8/GO9's with Safety Bundle - USAFS INSTALLED",
+    "sku": "2613",
+    "price": 28.95,
+    "installType": "USAFS (install not ordered from GT)",
+    "bundle": "Safety (Sensor)",
+    "estimateNote": "Include 2636 (INS-GOSTD)",
+    "myadminAction": "For Go's that will be replaced. Make Note to terminate replaced devices after swap is complete. Order new Go9B's on Go w/ BUNDLE-GOGF promo ***DO NOT include Install in Order"
+  },
+  {
+    "product": "2026 - MRT - GF with Safety Bundle - USAFS INSTALLED",
+    "sku": "2614",
+    "price": 11.95,
+    "installType": "USAFS (install not ordered from GT)",
+    "bundle": "Safety (Sensor)",
+    "estimateNote": "Include 2638 (INS-CAMERA)",
+    "myadminAction": "Order on Go Plan w/ BUNDLE-GOGF Promo ***DO NOT include Install in Order"
+  },
+  {
+    "product": "2026 - MRT - GO with Safety Bundle - Geotab INSTALLED",
+    "sku": "2615",
+    "price": 28.95,
+    "installType": "Geotab (Install ordered)",
+    "bundle": "Safety (Sensor)",
+    "estimateNote": "Include 2636 (INS-GOSTD)",
+    "myadminAction": "Order on Go Plan w/ BUNDLE-GOGF-INS Promo *include INS-GOSTD in order"
+  },
+  {
+    "product": "2026 - MRT - Upgrade Existing GO9Bs with Safety Bundle - Geotab INSTALLED",
+    "sku": "2616",
+    "price": 28.95,
+    "installType": "Geotab (Install ordered)",
+    "bundle": "Safety (Sensor)",
+    "myadminAction": "Identify existing Go9's that will have GF added and Apply BUNDLE-GOGF-INS promo"
+  },
+  {
+    "product": "2026 - MRT - Replace GO8/GO9's with Safety Bundle - Geotab INSTALLED",
+    "sku": "2617",
+    "price": 28.95,
+    "installType": "Geotab (Install ordered)",
+    "bundle": "Safety (Sensor)",
+    "estimateNote": "Include 2636 (INS-GOSTD)",
+    "myadminAction": "For Go's that will be replaced. Make Note to terminate replaced devices after swap is complete. Order new Go9b's on Go w/ BUNDLE-GOGF-INS Promo *include INS-GOSTD in order"
+  },
+  {
+    "product": "2026 - MRT - GF with Safety Bundle - Geotab INSTALLED",
+    "sku": "2618",
+    "price": 11.95,
+    "installType": "Geotab (Install ordered)",
+    "bundle": "Safety (Sensor)",
+    "estimateNote": "Include 2638 (INS-CAMERA)",
+    "myadminAction": "Order on Go Plan w/ BUNDLE-GOGF-INS Promo *include INS-CAMERA in order"
+  },
+  {
+    "product": "2026 - MRT - GO with Safety Plus Bundle",
+    "sku": "2619",
+    "price": 28.95,
+    "installType": "Self Install",
+    "bundle": "Safety Plus (Camera)",
+    "myadminAction": "Order on Go Plan w/ BUNDLE-GOGFP Promo"
+  },
+  {
+    "product": "2026 - MRT - Upgrade Existing GO9Bs with Safety Plus Bundle",
+    "sku": "2620",
+    "price": 28.95,
+    "installType": "Self Install",
+    "bundle": "Safety Plus (Camera)",
+    "myadminAction": "Identify existing Go9's that will have GFP added and Apply BUNDLE-GOGFP promo"
+  },
+  {
+    "product": "2026 - MRT - Replace GO8/GO9's with Safety Plus Bundle",
+    "sku": "2621",
+    "price": 28.95,
+    "installType": "Self Install",
+    "bundle": "Safety Plus (Camera)",
+    "myadminAction": "For Go's that will be replaced. Make Note to terminate replaced device after swap is complete. Order new Go9B's on Go w/ BUNDLE-GOGFP promo"
+  },
+  {
+    "product": "2026 - MRT - GFP with Safety Plus Bundle",
+    "sku": "2622",
+    "price": 16.95,
+    "installType": "Self Install",
+    "bundle": "Safety Plus (Camera)",
+    "myadminAction": "Order on Go Plan w/ BUNDLE-GOGFP Promo"
+  },
+  {
+    "product": "2026 - MRT - GO with Safety Plus Bundle - USAFS INSTALLED",
+    "sku": "2623",
+    "price": 28.95,
+    "installType": "USAFS (install not ordered from GT)",
+    "bundle": "Safety Plus (Camera)",
+    "estimateNote": "Include 2636 (INS-GOSTD)",
+    "myadminAction": "Order on Go Plan w/ BUNDLE-GOGFP Promo ***DO NOT include Install in Order"
+  },
+  {
+    "product": "2026 - MRT - Upgrade Existing GO9Bs with Safety Plus Bundle - USAFS INSTALLED",
+    "sku": "2624",
+    "price": 28.95,
+    "installType": "USAFS (install not ordered from GT)",
+    "bundle": "Safety Plus (Camera)",
+    "myadminAction": "Identify existing Go9's that will have GFP added and Apply BUNDLE-GOGFP promo"
+  },
+  {
+    "product": "2026 - MRT - Replace GO8/GO9's with Safety Plus Bundle - USAFS INSTALLED",
+    "sku": "2625",
+    "price": 28.95,
+    "installType": "USAFS (install not ordered from GT)",
+    "bundle": "Safety Plus (Camera)",
+    "estimateNote": "Include 2636 (INS-GOSTD)",
+    "myadminAction": "For Go's that will be replaced. Make Note to terminate replaced devices after swap is complete. Order new Go9B's on Go w/ BUNDLE-GOGFP Promo ***DO NOT include Install in Order"
+  },
+  {
+    "product": "2026 - MRT - GFP with Safety Plus Bundle - USAFS INSTALLED",
+    "sku": "2626",
+    "price": 20.95,
+    "installType": "USAFS (install not ordered from GT)",
+    "bundle": "Safety Plus (Camera)",
+    "estimateNote": "Include 2638 (INS-CAMERA)",
+    "myadminAction": "Order on Go Plan w/ BUNDLE-GOGFP Promo ***DO NOT include Install in Order"
+  },
+  {
+    "product": "2026 - MRT - GO with Safety Plus Bundle - Geotab INSTALLED",
+    "sku": "2627",
+    "price": 28.95,
+    "installType": "Geotab (Install ordered)",
+    "bundle": "Safety Plus (Camera)",
+    "estimateNote": "Include 2636 (INS-GOSTD)",
+    "myadminAction": "Order on Go Plan w/ BUNDLE-GOGFP-INS Promo *include INS-GOSTD in order"
+  },
+  {
+    "product": "2026 - MRT - Upgrade Existing GO9Bs with Safety Plus Bundle - Geotab INSTALLED",
+    "sku": "2628",
+    "price": 28.95,
+    "installType": "Geotab (Install ordered)",
+    "bundle": "Safety Plus (Camera)",
+    "myadminAction": "Identify existing Go9's that will have GFP added and Apply BUNDLE-GOGFP-INS promo"
+  },
+  {
+    "product": "2026 - MRT - Replace GO8/GO9's with Safety Plus Bundle - Geotab INSTALLED",
+    "sku": "2629",
+    "price": 28.95,
+    "installType": "Geotab (Install ordered)",
+    "bundle": "Safety Plus (Camera)",
+    "estimateNote": "Include 2636 (INS-GOSTD)",
+    "myadminAction": "For Go's that will be replaced. Make Note to terminate replaced devices after swap is complete. Order new Go9B's on Go w/ BUNDLE-GOGFP-INS Promo *include INS-GOSTD in order"
+  },
+  {
+    "product": "2026 - MRT - GFP with Safety Plus Bundle - Geotab INSTALLED",
+    "sku": "2630",
+    "price": 20.95,
+    "installType": "Geotab (Install ordered)",
+    "bundle": "Safety Plus (Camera)",
+    "estimateNote": "Include 2638 (INS-CAMERA)",
+    "myadminAction": "Order on Go Plan w/ BUNDLE-GOGFP-INS Promo *include INS-CAMERA in order"
+  },
+  {
+    "product": "2026 GO9-LTMB1VZW - BUNDLED",
+    "sku": "2631",
+    "price": null,
+    "installType": "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)",
+    "bundle": "Core, Go, Safety (Sensor), Safety Plus (Camera)",
+    "estimateNote": "Include Harness"
+  },
+  {
+    "product": "2026 GO9-LTMB1ATT - BUNDLED",
+    "sku": "2632",
+    "price": null,
+    "installType": "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)",
+    "bundle": "Core, Go, Safety (Sensor), Safety Plus (Camera)",
+    "estimateNote": "Include Harness"
+  },
+  {
+    "product": "2026 GO Focus Safety Sensor - BUNDLED",
+    "sku": "2633",
+    "price": null,
+    "installType": "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)",
+    "bundle": "Safety (Sensor)"
+  },
+  {
+    "product": "2026 GO Focus Plus Camera -  BUNDLED",
+    "sku": "2634",
+    "price": null,
+    "installType": "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)",
+    "bundle": "Safety Plus (Camera)"
+  },
+  {
+    "product": "2026 External Auxiliary Rear Camera - BUNDLED",
+    "sku": "2635",
+    "installType": "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)",
+    "bundle": "Safety Plus (Camera)"
+  },
+  {
+    "product": "2026 INS-GOSTRD - BUNDLED",
+    "sku": "2636",
+    "price": null,
+    "installType": "USAFS (install not ordered from GT), Geotab (Install ordered)",
+    "bundle": "Core, Go, Safety (Sensor), Safety Plus (Camera)",
+    "estimateNote": "Include for all USAFS & Geotab Installed Go Devices",
+    "myadminAction": "Only include for BUNDLE-XX-INS Promos"
+  },
+  {
+    "product": "2026 INS-GOADV - BUNDLED",
+    "sku": "2637",
+    "price": null,
+    "installType": "Null",
+    "bundle": "Null"
+  },
+  {
+    "product": "2026 INS-CAMERA - BUNDLED",
+    "sku": "2638",
+    "price": null,
+    "installType": "USAFS (install not ordered from GT), Geotab (Install ordered)",
+    "bundle": "Safety (Sensor), Safety Plus (Camera)",
+    "estimateNote": "Include for all USAFS & Geotab Installed Sensors/Cameras",
+    "myadminAction": "Only include for BUNDLE-XX-INS Promos"
+  },
+  {
+    "product": "3-Wire Harness - BUNDLED",
+    "sku": "HRN-CW03K3-A",
+    "price": null,
+    "installType": "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)",
+    "bundle": "Core, Go, Safety (Sensor), Safety Plus (Camera)"
+  },
+  {
+    "product": "6-Pin Harness - BUNDLED",
+    "sku": "HRN-DS06T2-A",
+    "price": null,
+    "installType": "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)",
+    "bundle": "Core, Go, Safety (Sensor), Safety Plus (Camera)"
+  },
+  {
+    "product": "9-Pin Harness - BUNDLED",
+    "sku": "HRN-GS09K2-A",
+    "price": null,
+    "installType": "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)",
+    "bundle": "Core, Go, Safety (Sensor), Safety Plus (Camera)"
+  },
+  {
+    "product": "16-Pin OBDII Harness - BUNDLED",
+    "sku": "HRN-GS16K22-A",
+    "price": null,
+    "installType": "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)",
+    "bundle": "Core, Go, Safety (Sensor), Safety Plus (Camera)"
+  }
+]
