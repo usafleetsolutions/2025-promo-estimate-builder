@@ -26,9 +26,13 @@
   .customer-input:focus { border-color: #3b82f6; }
   .customer-input::placeholder { color: #64748b; }
 
-  .filters { padding: 20px 32px; border-bottom: 1px solid #1e293b; background: #0e1220; }
-  .filter-group { margin-bottom: 16px; }
-  .filter-group:last-of-type { margin-bottom: 0; }
+  .filters {
+    padding: 20px 32px; border-bottom: 1px solid #1e293b; background: #0e1220;
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; align-items: center;
+  }
+  .filters-main { display: grid; gap: 16px; }
+  .filters-right { display: flex; justify-content: center; align-items: center; }
+  .filter-group { margin-bottom: 0; }
   .filter-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: #a1d5e3; margin-bottom: 8px; }
   .filter-chips { display: flex; gap: 8px; flex-wrap: wrap; }
   .chip {
@@ -46,6 +50,41 @@
   }
   .clear-btn.show { display: inline-block; }
   .clear-btn:hover { border-color: #64748b; color: #f1f5f9; }
+  .upload-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+  .upload-btn {
+    padding: 10px 16px; border-radius: 8px; border: 1px solid #3b82f6;
+    background: rgba(59,130,246,0.14); color: #93c5fd; font-size: 13px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-weight: 600;
+  }
+  .upload-btn:hover { background: rgba(59,130,246,0.24); }
+  .carrier-group { display: flex; flex-direction: column; gap: 6px; }
+  .carrier-select {
+    min-width: 200px; padding: 10px 12px; border-radius: 8px; border: 1.5px solid #1e293b;
+    background: #0c0f17; color: #f8fafc; font-size: 13px; outline: none;
+  }
+  .upload-summary { margin-top: 10px; color: #a1d5e3; font-size: 13px; line-height: 1.5; }
+  .harness-info { margin-top: 8px; color: #fbbf24; font-size: 13px; line-height: 1.5; }
+  .upload-help {
+    margin-top: 12px; padding: 12px 14px; border-radius: 6px; border-left: 3px solid #06b6d4;
+    background: rgba(6,182,212,0.08); color: #a1d5e3; font-size: 12px; line-height: 1.6;
+  }
+  .upload-help strong { color: #06b6d4; font-weight: 600; }
+  .install-info {
+    padding: 18px 22px; border-radius: 10px; border-bottom: 1px solid #334155;
+    background: linear-gradient(135deg, rgba(59,130,246,0.18), rgba(15,23,42,0.9));
+    display: none; border-left: 6px solid #3b82f6; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+    width: 100%; max-width: 380px;
+  }
+  .install-info.show { display: block; }
+
+  .install-info {
+    padding: 20px 32px; margin: 0 0 0 -32px; border-radius: 0 0 10px 0;
+    border-bottom: 1px solid #334155; background: linear-gradient(135deg, rgba(59,130,246,0.18), rgba(15,23,42,0.9));
+    display: none; border-left: 6px solid #3b82f6; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+  }
+  .install-info.show { display: block; }
+  .install-info-content { font-size: 15px; color: #e2e8f0; line-height: 1.75; }
+  .install-info-label { font-size: 12px; font-weight: 700; letter-spacing: 1px; color: #a1d5e3; margin-bottom: 8px; }
 
   .summary {
     padding: 14px 32px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
@@ -159,15 +198,39 @@
 </div>
 
 <div class="filters">
-  <div class="filter-group">
-    <div class="filter-label">Install Type</div>
-    <div class="filter-chips" id="installChips"></div>
+  <div class="filters-main">
+    <div class="filter-group">
+      <div class="filter-label">Install Type</div>
+      <div class="filter-chips" id="installChips"></div>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Bundle</div>
+      <div class="filter-chips" id="bundleChips"></div>
+    </div>
+    <div class="upload-row">
+      <button class="upload-btn" type="button" onclick="document.getElementById('uploadWorkbook').click()">Upload Camera Report</button>
+      <div class="carrier-group">
+        <label class="filter-label" for="carrierSelect">GO9 Carrier</label>
+        <select id="carrierSelect" class="carrier-select" onchange="setUploadCarrier(this.value)">
+          <option value="2631">Verizon (2631)</option>
+          <option value="2632">AT&amp;T (2632)</option>
+        </select>
+      </div>
+      <input type="file" id="uploadWorkbook" accept=".xlsx" style="display:none" onchange="handleWorkbookUpload(event)">
+    </div>
+    <div id="uploadSummary" class="upload-summary"></div>
+    <div id="harnessInfo" class="harness-info"></div>
+    <div class="upload-help">
+      <strong>Upload Camera Report:</strong> Export the Report sheet from your database. Select your GO9 carrier, then upload. The builder will auto-populate quantities for upgrades, replacements, new devices, and sensors/cameras based on the report data. Harnesses must be added manually below.
+    </div>
+    <button class="clear-btn" id="clearBtn" onclick="clearFilters()">Clear all filters</button>
   </div>
-  <div class="filter-group">
-    <div class="filter-label">Bundle</div>
-    <div class="filter-chips" id="bundleChips"></div>
+  <div class="filters-right">
+    <div class="install-info" id="installInfo">
+      <div class="install-info-label">Install Type Details</div>
+      <div class="install-info-content" id="installInfoContent"></div>
+    </div>
   </div>
-  <button class="clear-btn" id="clearBtn" onclick="clearFilters()">Clear all filters</button>
 </div>
 
 <div class="summary" id="summary">
@@ -221,79 +284,99 @@
   <div class="subtitle">Try selecting a different install type or bundle</div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-var DATA = [
-  { product: "2026 - MRT - GO Core Plan Bundle", sku: "2601", price: 14.95, cost: 8, installType: "Self Install", bundle: "Core", estimateNote: "", myadminAction: "Order on Core Plan w/ BUNDLE-GO Promo" },
-  { product: "2026 - MRT - GO Core Plan Bundle - USAFS INSTALLED", sku: "2602", price: 16.95, cost: 8, installType: "USAFS (install not ordered from GT)", bundle: "Core", estimateNote: "Include 2630 (INS-GOSTD)", myadminAction: "Order on Core Plan w/ BUNDLE-GO Promo ***DO NOT include Install in Order" },
-  { product: "2026 - MRT - GO Core Plan Bundle - Geotab INSTALLED", sku: "2603", price: 16.95, cost: 10, installType: "Geotab (Install ordered)", bundle: "Core", estimateNote: "Include 2630 (INS-GOSTD)", myadminAction: "Order on Core Plan w/ BUNDLE-GO-INS Promo *include INS-GOSTD in order" },
-  { product: "2026 - MRT - GO Plan Bundle", sku: "2604", price: 28.95, cost: 16, installType: "Self Install", bundle: "Go", estimateNote: "", myadminAction: "Order on Go Plan w/ BUNDLE-GO Promo" },
-  { product: "2026 - MRT - GO Plan Bundle - USAFS INSTALLED", sku: "2605", price: 30.95, cost: 16, installType: "USAFS (install not ordered from GT)", bundle: "Go", estimateNote: "Include 2630 (INS-GOSTD)", myadminAction: "Order on Go Plan w/ BUNDLE-GO Promo ***DO NOT include Install in Order" },
-  { product: "2026 - MRT - GO Plan Bundle - Geotab INSTALLED", sku: "2606", price: 30.95, cost: 18, installType: "Geotab (Install ordered)", bundle: "Go", estimateNote: "Include 2630 (INS-GOSTD)", myadminAction: "Order on Go Plan w/ BUNDLE-GO-INS Promo *include INS-GOSTD in order" },
-  { product: "2026 - MRT - GO with Safety Bundle", sku: "2607", price: 28.95, cost: 16, installType: "Self Install", bundle: "Safety (Sensor)", estimateNote: "", myadminAction: "Order on Go Plan w/ BUNDLE-GOGF Promo" },
-  { product: "2026 - MRT - Upgrade Existing GO9s with Safety Bundle", sku: "2608", price: 28.95, cost: 16, installType: "Self Install", bundle: "Safety (Sensor)", estimateNote: "", myadminAction: "Identify existing Go9's that will have GF added and Apply BUNDLE-GOGF promo" },
-  { product: "2026 - MRT - GF with Safety Bundle", sku: "2609", price: 11.95, cost: 4, installType: "Self Install", bundle: "Safety (Sensor)", estimateNote: "", myadminAction: "Order on Go Plan w/ BUNDLE-GOGF Promo" },
-  { product: "2026 - MRT - GO with Safety Bundle - USAFS INSTALLED", sku: "2610", price: 28.95, cost: 16, installType: "USAFS (install not ordered from GT)", bundle: "Safety (Sensor)", estimateNote: "Include 2630 (INS-GOSTD)", myadminAction: "Order on Go Plan w/ BUNDLE-GOGF Promo ***DO NOT include Install in Order" },
-  { product: "2026 - MRT - Upgrade Existing GO9s with Safety Bundle - USAFS INSTALLED", sku: "2611", price: 28.95, cost: 16, installType: "USAFS (install not ordered from GT)", bundle: "Safety (Sensor)", estimateNote: "", myadminAction: "Identify existing Go9's that will have GF added and Apply BUNDLE-GOGF promo" },
-  { product: "2026 - MRT - GF with Safety Bundle - USAFS INSTALLED", sku: "2612", price: 11.95, cost: 4, installType: "USAFS (install not ordered from GT)", bundle: "Safety (Sensor)", estimateNote: "Include 2632 (INS-CAMERA)", myadminAction: "Order on Go Plan w/ BUNDLE-GOGF Promo ***DO NOT include Install in Order" },
-  { product: "2026 - MRT - GO with Safety Bundle - Geotab INSTALLED", sku: "2613", price: 28.95, cost: 18, installType: "Geotab (Install ordered)", bundle: "Safety (Sensor)", estimateNote: "Include 2630 (INS-GOSTD)", myadminAction: "Order on Go Plan w/ BUNDLE-GOGF-INS Promo *include INS-GOSTD in order" },
-  { product: "2026 - MRT - Upgrade Existing GO9s with Safety Bundle - Geotab INSTALLED", sku: "2614", price: 28.95, cost: 18, installType: "Geotab (Install ordered)", bundle: "Safety (Sensor)", estimateNote: "", myadminAction: "Identify existing Go9's that will have GF added and Apply BUNDLE-GOGF-INS promo" },
-  { product: "2026 - MRT - GF with Safety Bundle - Geotab INSTALLED", sku: "2615", price: 11.95, cost: 6, installType: "Geotab (Install ordered)", bundle: "Safety (Sensor)", estimateNote: "Include 2632 (INS-CAMERA)", myadminAction: "Order on Go Plan w/ BUNDLE-GOGF-INS Promo *include INS-CAMERA in order" },
-  { product: "2026 - MRT - GO with Safety Plus Bundle", sku: "2616", price: 28.95, cost: 16, installType: "Self Install", bundle: "Safety Plus (Camera)", estimateNote: "", myadminAction: "Order on Go Plan w/ BUNDLE-GOGFP Promo" },
-  { product: "2026 - MRT - Upgrade Existing GO9s with Safety Plus Bundle", sku: "2617", price: 28.95, cost: 16, installType: "Self Install", bundle: "Safety Plus (Camera)", estimateNote: "", myadminAction: "Identify existing Go9's that will have GFP added and Apply BUNDLE-GOGFP promo" },
-  { product: "2026 - MRT - GFP with Safety Plus Bundle", sku: "2618", price: 16.95, cost: 9, installType: "Self Install", bundle: "Safety Plus (Camera)", estimateNote: "", myadminAction: "Order on Go Plan w/ BUNDLE-GOGFP Promo" },
-  { product: "2026 - MRT - GO with Safety Plus Bundle - USAFS INSTALLED", sku: "2619", price: 28.95, cost: 16, installType: "USAFS (install not ordered from GT)", bundle: "Safety Plus (Camera)", estimateNote: "Include 2630 (INS-GOSTD)", myadminAction: "Order on Go Plan w/ BUNDLE-GOGFP Promo ***DO NOT include Install in Order" },
-  { product: "2026 - MRT - Upgrade Existing GO9s with Safety Plus Bundle - USAFS INSTALLED", sku: "2620", price: 28.95, cost: 16, installType: "USAFS (install not ordered from GT)", bundle: "Safety Plus (Camera)", estimateNote: "", myadminAction: "Identify existing Go9's that will have GFP added and Apply BUNDLE-GOGFP promo" },
-  { product: "2026 - MRT - GFP with Safety Plus Bundle - USAFS INSTALLED", sku: "2621", price: 20.95, cost: 9, installType: "USAFS (install not ordered from GT)", bundle: "Safety Plus (Camera)", estimateNote: "Include 2632 (INS-CAMERA)", myadminAction: "Order on Go Plan w/ BUNDLE-GOGFP Promo ***DO NOT include Install in Order" },
-  { product: "2026 - MRT - GO with Safety Plus Bundle - Geotab INSTALLED", sku: "2622", price: 28.95, cost: 18, installType: "Geotab (Install ordered)", bundle: "Safety Plus (Camera)", estimateNote: "Include 2630 (INS-GOSTD)", myadminAction: "Order on Go Plan w/ BUNDLE-GOGFP-INS Promo *include INS-GOSTD in order" },
-  { product: "2026 - MRT - Upgrade Existing GO9s with Safety Plus Bundle - Geotab INSTALLED", sku: "2623", price: 28.95, cost: 18, installType: "Geotab (Install ordered)", bundle: "Safety Plus (Camera)", estimateNote: "", myadminAction: "Identify existing Go9's that will have GFP added and Apply BUNDLE-GOGFP-INS promo" },
-  { product: "2026 - MRT - GFP with Safety Plus Bundle - Geotab INSTALLED", sku: "2624", price: 20.95, cost: 11, installType: "Geotab (Install ordered)", bundle: "Safety Plus (Camera)", estimateNote: "Include 2632 (INS-CAMERA)", myadminAction: "Order on Go Plan w/ BUNDLE-GOGFP-INS Promo *include INS-CAMERA in order" },
-  { product: "2026 GO9-LTMB1VZW - BUNDLED", sku: "2625", price: 0, cost: 0, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Core, Go, Safety (Sensor), Safety Plus (Camera)", estimateNote: "Include Harness", myadminAction: "" },
-  { product: "2026 GO9-LTMB1ATT - BUNDLED", sku: "2626", price: 0, cost: 0, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Core, Go, Safety (Sensor), Safety Plus (Camera)", estimateNote: "Include Harness", myadminAction: "" },
-  { product: "2026 GO Focus Safety Sensor - BUNDLED", sku: "2627", price: 0, cost: 0, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Safety (Sensor)", estimateNote: "", myadminAction: "" },
-  { product: "2026 GO Focus Plus Camera - BUNDLED", sku: "2628", price: 0, cost: 0, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Safety Plus (Camera)", estimateNote: "", myadminAction: "" },
-  { product: "2026 External Auxiliary Rear Camera - BUNDLED", sku: "2629", price: null, cost: 306, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Safety Plus (Camera)", estimateNote: "", myadminAction: "" },
-  { product: "2026 INS-GOSTRD - BUNDLED", sku: "2630", price: 0, cost: null, installType: "USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Core, Go, Safety (Sensor), Safety Plus (Camera)", estimateNote: "Include for all USAFS & Geotab Installed Go Devices", myadminAction: "Only include for BUNDLE-XX-INS Promos" },
-  { product: "2026 INS-GOADV - BUNDLED", sku: "2631", price: 0, cost: 0, installType: "Null", bundle: "Null", estimateNote: "", myadminAction: "" },
-  { product: "2026 INS-CAMERA - BUNDLED", sku: "2632", price: 0, cost: 0, installType: "USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Safety (Sensor), Safety Plus (Camera)", estimateNote: "Include for all USAFS & Geotab Installed Sensors/Cameras", myadminAction: "Only include for BUNDLE-XX-INS Promos" },
-  { product: "3-Wire Harness - BUNDLED", sku: "HRN-CW03K3-A", price: 0, cost: 0, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Core, Go, Safety (Sensor), Safety Plus (Camera)", estimateNote: "", myadminAction: "" },
-  { product: "6-Pin Harness - BUNDLED", sku: "HRN-DS06T2-A", price: 0, cost: 0, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Core, Go, Safety (Sensor), Safety Plus (Camera)", estimateNote: "", myadminAction: "" },
-  { product: "9-Pin Harness - BUNDLED", sku: "HRN-GS09K2-A", price: 0, cost: 0, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Core, Go, Safety (Sensor), Safety Plus (Camera)", estimateNote: "", myadminAction: "" },
-  { product: "16-Pin OBDII Harness - BUNDLED", sku: "HRN-GS16K22-A", price: 0, cost: 0, installType: "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)", bundle: "Core, Go, Safety (Sensor), Safety Plus (Camera)", estimateNote: "", myadminAction: "" }
-];
-
+var DATA = [];
+var DATA_URL = 'data.json';
 var INCLUDE_LINKS = {};
 var REVERSE_MAP = {};
-DATA.forEach(function(item) {
-  var m = item.estimateNote.match(/^Include (\d{4})\b/);
-  if (m) {
-    var targetSku = m[1];
-    INCLUDE_LINKS[item.sku] = targetSku;
-    if (!REVERSE_MAP[targetSku]) REVERSE_MAP[targetSku] = [];
-    REVERSE_MAP[targetSku].push(item.sku);
-  }
-});
 
-var INSTALL_TYPES = ["Self Install", "USAFS (install not ordered from GT)", "Geotab (Install ordered)"];
-var BUNDLES = ["Core", "Go", "Safety (Sensor)", "Safety Plus (Camera)"];
-var INSTALL_SHORT = { "Self Install": "Self Install", "USAFS (install not ordered from GT)": "USAFS", "Geotab (Install ordered)": "Geotab" };
+var INSTALL_TYPES = ['Self Install', 'USAFS (install not ordered from GT)', 'Geotab (Install ordered)'];
+var BUNDLES = ['Core', 'Go', 'Safety (Sensor)', 'Safety Plus (Camera)'];
+var INSTALL_SHORT = { 'Self Install': 'Self Install', 'USAFS (install not ordered from GT)': 'USAFS', 'Geotab (Install ordered)': 'Geotab' };
 var INSTALL_COLORS = {
-  "Self Install": { accent: "#8b5cf6", bg: "rgba(139,92,246,0.12)", border: "rgba(139,92,246,0.19)" },
-  "USAFS (install not ordered from GT)": { accent: "#06b6d4", bg: "rgba(6,182,212,0.12)", border: "rgba(6,182,212,0.19)" },
-  "Geotab (Install ordered)": { accent: "#eab308", bg: "rgba(234,179,8,0.12)", border: "rgba(234,179,8,0.19)" }
+  'Self Install': { accent: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.19)' },
+  'USAFS (install not ordered from GT)': { accent: '#06b6d4', bg: 'rgba(6,182,212,0.12)', border: 'rgba(6,182,212,0.19)' },
+  'Geotab (Install ordered)': { accent: '#eab308', bg: 'rgba(234,179,8,0.12)', border: 'rgba(234,179,8,0.19)' }
 };
 var BUNDLE_COLORS = {
-  "Core": { accent: "#3b82f6", bg: "rgba(59,130,246,0.12)", border: "rgba(59,130,246,0.19)" },
-  "Go": { accent: "#22c55e", bg: "rgba(34,197,94,0.12)", border: "rgba(34,197,94,0.19)" },
-  "Safety (Sensor)": { accent: "#f97316", bg: "rgba(249,115,22,0.12)", border: "rgba(249,115,22,0.19)" },
-  "Safety Plus (Camera)": { accent: "#ec4899", bg: "rgba(236,72,153,0.12)", border: "rgba(236,72,153,0.19)" }
+  'Core': { accent: '#3b82f6', bg: 'rgba(59,130,246,0.12)', border: 'rgba(59,130,246,0.19)' },
+  'Go': { accent: '#22c55e', bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.19)' },
+  'Safety (Sensor)': { accent: '#f97316', bg: 'rgba(249,115,22,0.12)', border: 'rgba(249,115,22,0.19)' },
+  'Safety Plus (Camera)': { accent: '#ec4899', bg: 'rgba(236,72,153,0.12)', border: 'rgba(236,72,153,0.19)' }
+};
+
+var INSTALL_INFO = {
+  'Self Install': 'Self Install: customer-led install and swap of the car. This option is the most affordable choice and does not include Geotab-managed install billing.',
+  'USAFS (install not ordered from GT)': 'USAFS (In-House): USAFS performs the install internally. The customer pays the install bundle MRT, but installs are NOT ordered through Geotab.',
+  'Geotab (Install ordered)': 'Geotab (Third-Party): install work is handled by Geotab-approved third-party installers with higher bundled MRT. Use this for customers outside our USAFS service area.'
 };
 
 var installFilter = null;
 var bundleFilter = null;
 var quantities = {};
 var autoQuantities = {};
+var uploadCarrierSku = '2631';
+var uploadSummary = null;
+var harnessTotal = 0;
+var uploadedVehicles = [];
 
-function init() { renderChips(); render(); }
+function init() { renderChips(); loadDefaultData(); }
+
+function loadDefaultData() {
+  fetch(DATA_URL)
+    .then(function(res) { if (!res.ok) throw new Error('Unable to fetch ' + DATA_URL); return res.json(); })
+    .then(function(json) { setData(json); })
+    .catch(function(error) { console.error(error); alert('Unable to load default data file. Use Load Workbook to import a file.'); setData([]); });
+}
+
+function setData(dataArray) {
+  DATA = Array.isArray(dataArray) ? dataArray.map(normalizeImportedItem) : [];
+  buildLinkMaps();
+  quantities = {};
+  autoQuantities = {};
+  render();
+}
+
+function normalizeImportedItem(item) {
+  if (!item || typeof item !== 'object') return {};
+  function getValue(keys) {
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      if (item[key] !== undefined && item[key] !== null && String(item[key]).trim() !== '') return item[key];
+    }
+    return '';
+  }
+  function parseNumber(value) {
+    if (value === null || value === undefined || value === '') return null;
+    var num = parseFloat(String(value).replace(/[^0-9.\-]/g, ''));
+    return isNaN(num) ? null : num;
+  }
+  return {
+    product: String(getValue(['product', 'Product/Service', 'Product'])).trim(),
+    sku: String(getValue(['sku', 'SKU'])).trim(),
+    price: parseNumber(getValue(['price', 'Price', 'Sales Price/Rate'])),
+    cost: parseNumber(getValue(['cost', 'Cost'])),
+    installType: String(getValue(['installType', 'Install Type'])).trim(),
+    bundle: String(getValue(['bundle', 'Bundle'])).trim(),
+    estimateNote: String(getValue(['estimateNote', 'Estimate Note', 'Notes'])).trim(),
+    myadminAction: String(getValue(['myadminAction', 'MyAdmin Order Action', 'Action'])).trim()
+  };
+}
+
+function buildLinkMaps() {
+  INCLUDE_LINKS = {};
+  REVERSE_MAP = {};
+  DATA.forEach(function(item) {
+    var m = item.estimateNote.match(/^Include (\d{4})\b/);
+    if (m) {
+      var targetSku = m[1];
+      INCLUDE_LINKS[item.sku] = targetSku;
+      if (!REVERSE_MAP[targetSku]) REVERSE_MAP[targetSku] = [];
+      REVERSE_MAP[targetSku].push(item.sku);
+    }
+  });
+}
 
 function renderChips() {
   document.getElementById('installChips').innerHTML = INSTALL_TYPES.map(function(t) {
@@ -307,17 +390,185 @@ function renderChips() {
 function toggleInstall(val) {
   installFilter = installFilter === val ? null : val;
   quantities = {};
+  uploadSummary = null;
+  uploadedVehicles = [];
+  harnessTotal = 0;
+  renderUploadSummary();
   updateChipStyles(); render();
 }
 function toggleBundle(val) {
   bundleFilter = bundleFilter === val ? null : val;
   quantities = {};
+  uploadSummary = null;
+  uploadedVehicles = [];
+  harnessTotal = 0;
+  renderUploadSummary();
   updateChipStyles(); render();
 }
 function clearFilters() {
   installFilter = null; bundleFilter = null;
   quantities = {};
+  uploadSummary = null;
+  uploadedVehicles = [];
+  harnessTotal = 0;
+  renderUploadSummary();
   updateChipStyles(); render();
+}
+
+function setUploadCarrier(sku) {
+  uploadCarrierSku = sku;
+}
+
+function handleWorkbookUpload(event) {
+  var file = event.target.files && event.target.files[0];
+  if (!file) return;
+  if (!installFilter || !bundleFilter) {
+    alert('Please select Install Type and Bundle before uploading the Camera Report.');
+    event.target.value = '';
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = new Uint8Array(e.target.result);
+      var workbook = XLSX.read(data, { type: 'array', raw: false });
+      processUploadWorkbook(workbook);
+    } catch (err) {
+      console.error(err);
+      alert('Unable to read the uploaded workbook. Please make sure the file is a valid XLSX export.');
+    }
+    event.target.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function processUploadWorkbook(workbook) {
+  var sheetName = workbook.SheetNames.find(function(name) { return name.toLowerCase() === 'report'; });
+  if (!sheetName) {
+    alert('Report sheet not found in the uploaded workbook.');
+    return;
+  }
+
+  var rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, raw: false, defval: '' });
+  if (!rows || rows.length <= 25) {
+    alert('No vehicle rows found in the Report sheet.');
+    return;
+  }
+
+  var totals = { total: 0, upgrades: 0, replacements: 0, newDevices: 0 };
+  var vehicles = [];
+  for (var i = 25; i < rows.length; i++) {
+    var row = rows[i] || [];
+    var flag = String(row[1] || '').trim().toUpperCase();
+    var label = String(row[2] || '').trim();
+    var action = String(row[10] || '').trim();
+    if (flag !== 'Y' || !label) continue;
+    if (action === 'Not Go Device') continue;
+    vehicles.push({
+      assetLabel: label,
+      mmy: String(row[6] || '').trim(),
+      serialNumber: String(row[7] || '').trim(),
+      deviceType: String(row[8] || '').trim(),
+      plan: String(row[9] || '').trim(),
+      action: action
+    });
+    if (action === 'Apply Promocode' || action === 'Apply Promocode, Upgrade to Go Plan') {
+      totals.upgrades += 1;
+      totals.total += 1;
+    } else if (action === 'Order Replacement Go9B') {
+      totals.replacements += 1;
+      totals.total += 1;
+    } else if (action === 'Order New Go9B Device') {
+      totals.newDevices += 1;
+      totals.total += 1;
+    } else {
+      // ignore rows that are not part of the supported upload actions
+    }
+  }
+
+  if (totals.total === 0) {
+    alert('No eligible vehicles were detected in the Report sheet.');
+    return;
+  }
+
+  if (bundleFilter !== 'Safety (Sensor)' && bundleFilter !== 'Safety Plus (Camera)') {
+    alert('Upload Camera Report is supported only for Safety and Safety Plus bundles.');
+    return;
+  }
+
+  var generated = {};
+  var install = installFilter;
+  var bundle = bundleFilter;
+  var go9Sku = uploadCarrierSku;
+  var missing = [];
+
+  function addQty(sku, qty) {
+    if (!sku || qty <= 0) return;
+    generated[sku] = (generated[sku] || 0) + qty;
+  }
+
+  var upgradeItem = findMatchingItem('Upgrade Existing GO9Bs', install, bundle);
+  if (totals.upgrades > 0) {
+    if (!upgradeItem) missing.push('Upgrade Existing GO9Bs with ' + bundle);
+    else addQty(upgradeItem.sku, totals.upgrades);
+  }
+
+  var replaceItem = findMatchingItem("Replace GO8/GO9's", install, bundle);
+  if (totals.replacements > 0) {
+    if (!replaceItem) missing.push("Replace GO8/GO9's with " + bundle);
+    else addQty(replaceItem.sku, totals.replacements);
+    addQty(go9Sku, totals.replacements);
+  }
+
+  var newDeviceItem = findMatchingItem('GO with', install, bundle);
+  if (totals.newDevices > 0) {
+    if (!newDeviceItem) missing.push('GO with ' + bundle + ' item');
+    else addQty(newDeviceItem.sku, totals.newDevices);
+    addQty(go9Sku, totals.newDevices);
+  }
+
+  var cameraItem = findMatchingItem(bundle === 'Safety Plus (Camera)' ? 'GFP with Safety Plus Bundle' : 'GF with Safety Bundle', install, bundle);
+  if (cameraItem) {
+    addQty(cameraItem.sku, totals.total);
+  } else {
+    missing.push((bundle === 'Safety Plus (Camera)' ? 'GFP with Safety Plus Bundle' : 'GF with Safety Bundle') + ' item');
+  }
+
+  // Auto-populate hardware: 2633 for Safety Sensor, 2634 for Safety Plus Camera
+  var hardwareSku = bundle === 'Safety Plus (Camera)' ? '2634' : '2633';
+  addQty(hardwareSku, totals.total);
+
+  quantities = generated;
+  uploadSummary = totals;
+  uploadedVehicles = vehicles;
+  harnessTotal = totals.replacements + totals.newDevices;
+  renderUploadSummary();
+  render();
+
+  if (missing.length > 0) {
+    alert('Upload completed, but some matching SKUs were not found: ' + missing.join(', ') + '.');
+  }
+}
+
+function findMatchingItem(labelContains, install, bundle) {
+  var needle = String(labelContains).toLowerCase();
+  return DATA.find(function(item) {
+    if (!item.sku || !item.product || item.bundle !== bundle) return false;
+    if (!matchesFilter(item.installType, install)) return false;
+    return item.product.toLowerCase().indexOf(needle) !== -1;
+  });
+}
+
+function renderUploadSummary() {
+  var summaryEl = document.getElementById('uploadSummary');
+  var harnessEl = document.getElementById('harnessInfo');
+  if (!uploadSummary) {
+    summaryEl.textContent = '';
+    harnessEl.textContent = '';
+    return;
+  }
+  summaryEl.textContent = 'Uploaded: ' + uploadSummary.total + ' vehicles (' + uploadSummary.upgrades + ' upgrades, ' + uploadSummary.replacements + ' replacements, ' + uploadSummary.newDevices + ' new devices).';
+  harnessEl.textContent = harnessTotal > 0 ? 'Expected harnesses: ' + harnessTotal + '. Select harness SKUs manually below.' : '';
 }
 
 function updateChipStyles() {
@@ -338,6 +589,19 @@ function updateChipStyles() {
     el.innerHTML = val + (active ? ' <span style="margin-left:8px;opacity:0.6">\u2715</span>' : '');
   });
   document.getElementById('clearBtn').classList.toggle('show', !!(installFilter || bundleFilter));
+}
+
+function updateInstallInfo() {
+  var infoEl = document.getElementById('installInfo');
+  var contentEl = document.getElementById('installInfoContent');
+  if (!installFilter) {
+    infoEl.classList.remove('show');
+    contentEl.textContent = '';
+    return;
+  }
+  var infoText = INSTALL_INFO[installFilter] || '';
+  contentEl.textContent = infoText;
+  infoEl.classList.add('show');
 }
 
 function matchesFilter(cellValue, filterValue) {
@@ -428,6 +692,7 @@ function render() {
         '</div></td></tr>';
     }).join('');
   }
+  updateInstallInfo();
   updateSummary(filtered);
 }
 
@@ -444,7 +709,7 @@ function changeQty(sku, delta) {
   render();
 }
 
-function resetQuantities() { quantities = {}; render(); }
+function resetQuantities() { quantities = {}; uploadSummary = null; uploadedVehicles = []; harnessTotal = 0; renderUploadSummary(); render(); }
 
 function updateSummary(filtered) {
   var items = filtered.filter(function(i) { return getEffectiveQty(i.sku) > 0; });
@@ -477,14 +742,31 @@ function exportCSV() {
 
   var customerName = document.getElementById('customerName').value.trim();
   if (!customerName) { alert('Please enter a customer name before downloading.'); return; }
+
+  // Validate harness qty if devices were uploaded
+  if (harnessTotal > 0) {
+    var harnessQty = 0;
+    DATA.forEach(function(item) {
+      if (item.product && item.product.toLowerCase().indexOf('harness') !== -1) {
+        harnessQty += getEffectiveQty(item.sku);
+      }
+    });
+    if (harnessQty !== harnessTotal) {
+      alert('Harness qty (' + harnessQty + ') must equal GO devices ordered (' + harnessTotal + '). Please adjust harness quantities.');
+      return;
+    }
+  }
+
   var today = new Date().toISOString().slice(0,10);
   var rows = [];
 
-  // Customer name header row
   if (customerName) {
     rows.push('Customer:,' + csvEscape(customerName));
     rows.push('Date:,' + today);
     rows.push('Install Type:,' + csvEscape(installFilter ? INSTALL_SHORT[installFilter] || installFilter : 'All'));
+    if (installFilter) {
+      rows.push('Install Description:,' + csvEscape(INSTALL_INFO[installFilter] || ''));
+    }
     rows.push('Bundle:,' + csvEscape(bundleFilter || 'All'));
     rows.push('');
   }
@@ -495,7 +777,6 @@ function exportCSV() {
   selected.forEach(function(item) {
     var eq = getEffectiveQty(item.sku);
     var monthlyExt = (item.price || 0) * eq;
-
     var installs = item.installType.split(', ').map(function(s) { return s.trim(); });
     var installLabel = installFilter && installs.indexOf(installFilter) !== -1
       ? (INSTALL_SHORT[installFilter] || installFilter)
@@ -517,6 +798,23 @@ function exportCSV() {
       csvEscape(item.myadminAction)
     ].join(','));
   });
+
+  // Add vehicle list if upload data exists
+  if (uploadedVehicles && uploadedVehicles.length > 0) {
+    rows.push('');
+    rows.push('Vehicle List,,,,,');
+    rows.push(['Asset Label','MMY','Serial Number','Device Type','Plan','Action'].join(','));
+    uploadedVehicles.forEach(function(vehicle) {
+      rows.push([
+        csvEscape(vehicle.assetLabel),
+        csvEscape(vehicle.mmy),
+        csvEscape(vehicle.serialNumber),
+        csvEscape(vehicle.deviceType),
+        csvEscape(vehicle.plan),
+        csvEscape(vehicle.action)
+      ].join(','));
+    });
+  }
 
   var csvContent = '\uFEFF' + rows.join('\r\n');
   var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
