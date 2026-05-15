@@ -319,6 +319,7 @@ var autoQuantities = {};
 var uploadCarrierSku = '2631';
 var uploadSummary = null;
 var harnessTotal = 0;
+var harnessUnknownTotal = 0;
 var uploadedVehicles = [];
 
 function init() { renderChips(); loadDefaultData(); }
@@ -457,32 +458,80 @@ function processUploadWorkbook(workbook) {
 
   var totals = { total: 0, upgrades: 0, replacements: 0, newDevices: 0 };
   var vehicles = [];
+  // Attempt to locate harness columns in the Report sheet (newer reports include harness counts)
+  var headerRow = rows[24] || rows[23] || rows[0] || [];
+  function findHeader(regex) {
+    for (var hi = 0; hi < headerRow.length; hi++) {
+      var h = String(headerRow[hi] || '').toLowerCase();
+      if (regex.test(h)) return hi;
+    }
+    return -1;
+  }
+  var harnessTypeIdx = findHeader(/harness.*required|harness.*type|harn.*required/);
+  var harnessCountIdx = findHeader(/new harness|harness.*qty|harness.*count|qty.*harness|count.*harness/);
+  var replaceColIdx = findHeader(/order (go8|go9) replacement|order .*replacement|replacement/i);
+  var upgradeColIdx = findHeader(/upgrade existing go9b|upgrade.*go9b|upgrade/i);
+  var newDeviceColIdx = findHeader(/order new device|new device/i);
+  var notGoDeviceIdx = findHeader(/not go device|not.*go.*device/i);
+
+  function getSummaryHarnessCounts() {
+    var summary = {};
+    for (var ri = 11; ri <= 16; ri++) {
+      var row = rows[ri] || [];
+      var sku = String(row[7] || '').trim();
+      var qty = parseInt(String(row[8] || '').replace(/[^0-9\-]/g, ''), 10) || 0;
+      if (!sku || qty <= 0) continue;
+      summary[sku.toUpperCase()] = (summary[sku.toUpperCase()] || 0) + qty;
+    }
+    return Object.keys(summary).length > 0 ? summary : null;
+  }
+
+  var harnessCountsByType = {};
+  var summaryHarnessCounts = getSummaryHarnessCounts();
+  var useSummaryHarnessCounts = summaryHarnessCounts !== null;
+  if (useSummaryHarnessCounts) {
+    harnessCountsByType = summaryHarnessCounts;
+  }
+
   for (var i = 25; i < rows.length; i++) {
     var row = rows[i] || [];
     var flag = String(row[1] || '').trim().toUpperCase();
     var label = String(row[2] || '').trim();
-    var action = String(row[10] || '').trim();
     if (flag !== 'Y' || !label) continue;
-    if (action === 'Not Go Device') continue;
+    if (notGoDeviceIdx !== -1 && String(row[notGoDeviceIdx] || '').trim() === 'Not Go Device') continue;
+
+    var replaceCount = 0;
+    var upgradeCount = 0;
+    var newDeviceCount = 0;
+    if (replaceColIdx !== -1) replaceCount = parseInt(String(row[replaceColIdx] || '').replace(/[^0-9]/g, ''), 10) || 0;
+    if (upgradeColIdx !== -1) upgradeCount = parseInt(String(row[upgradeColIdx] || '').replace(/[^0-9]/g, ''), 10) || 0;
+    if (newDeviceColIdx !== -1) newDeviceCount = parseInt(String(row[newDeviceColIdx] || '').replace(/[^0-9]/g, ''), 10) || 0;
+    var eligibleCount = replaceCount + upgradeCount + newDeviceCount;
+    if (eligibleCount === 0) continue;
+
     vehicles.push({
       assetLabel: label,
       mmy: String(row[6] || '').trim(),
       serialNumber: String(row[7] || '').trim(),
       deviceType: String(row[8] || '').trim(),
       plan: String(row[9] || '').trim(),
-      action: action
+      action: String(row[10] || '').trim()
     });
-    if (action === 'Apply Promocode' || action === 'Apply Promocode, Upgrade to Go Plan') {
-      totals.upgrades += 1;
-      totals.total += 1;
-    } else if (action === 'Order Replacement Go9B') {
-      totals.replacements += 1;
-      totals.total += 1;
-    } else if (action === 'Order New Go9B Device') {
-      totals.newDevices += 1;
-      totals.total += 1;
-    } else {
-      // ignore rows that are not part of the supported upload actions
+    totals.replacements += replaceCount;
+    totals.upgrades += upgradeCount;
+    totals.newDevices += newDeviceCount;
+    totals.total += eligibleCount;
+
+    // collect harness counts from New Harness column only when summary is not available
+    if (!useSummaryHarnessCounts && harnessCountIdx !== -1) {
+      var hc = parseInt(String(row[harnessCountIdx] || '').replace(/[^0-9\-]/g, ''), 10) || 0;
+      if (hc > 0) {
+        var htype = harnessTypeIdx !== -1 ? String(row[harnessTypeIdx] || '').trim() : '';
+        // normalize known 16-pin variants
+        var key = (htype || '').toUpperCase();
+        if (!key) key = '16-PIN';
+        harnessCountsByType[key] = (harnessCountsByType[key] || 0) + hc;
+      }
     }
   }
 
@@ -538,10 +587,61 @@ function processUploadWorkbook(workbook) {
   var hardwareSku = bundle === 'Safety Plus (Camera)' ? '2634' : '2633';
   addQty(hardwareSku, totals.total);
 
+  // If harness counts were detected in the Report, map them to app harness SKUs and add qtys
+  if (Object.keys(harnessCountsByType).length > 0) {
+    var HARNESS_MAP = {
+      '3': 'HRN-CW03K3-A',
+      '3-WIRE': 'HRN-CW03K3-A',
+      '6': 'HRN-DS06T2-A',
+      '6-PIN': 'HRN-DS06T2-A',
+      '9': 'HRN-GS09K2-A',
+      '9-PIN': 'HRN-GS09K2-A',
+      // map all 16-pin variants to HRN-GSK22 in the app
+      '16': 'HRN-GSK22',
+      '16-PIN': 'HRN-GSK22',
+      'HRN-GS16K2-LD': 'HRN-GS16K2-LD',
+      'HRN-GS16K2-HD': 'HRN-GS16K2-HD',
+      'HRN-GSK22': 'HRN-GSK22',
+      'HRN-GS16K22': 'HRN-GSK22'
+    };
+
+    function resolveHarnessSku(rawKey) {
+      var normalized = String(rawKey || '').toUpperCase().trim();
+      if (!normalized) return null;
+      // exact app harness sku should map to itself
+      if (normalized === 'HRN-CW03K3-A' || normalized === 'HRN-DS06T2-A' || normalized === 'HRN-GS09K2-A' || normalized === 'HRN-GSK22' || normalized === 'HRN-GS16K2-LD' || normalized === 'HRN-GS16K2-HD' || normalized === 'HRN-GS16K22-A' || normalized === 'HRN-GS16K22') {
+        return normalized === 'HRN-GS16K22-A' ? 'HRN-GSK22' : normalized;
+      }
+      if (HARNESS_MAP[normalized]) return HARNESS_MAP[normalized];
+      var m = normalized.match(/(\d{1,2})/);
+      if (m && HARNESS_MAP[m[1]]) return HARNESS_MAP[m[1]];
+      return null;
+    }
+
+    var mappedHarnessTotal = 0;
+    var unmappedHarnessTotal = 0;
+    Object.keys(harnessCountsByType).forEach(function(rawKey) {
+      var mapped = resolveHarnessSku(rawKey);
+      if (mapped) {
+        addQty(mapped, harnessCountsByType[rawKey]);
+        mappedHarnessTotal += harnessCountsByType[rawKey];
+      } else {
+        unmappedHarnessTotal += harnessCountsByType[rawKey];
+      }
+    });
+    harnessUnknownTotal = unmappedHarnessTotal;
+    var totalHarnessCount = mappedHarnessTotal + unmappedHarnessTotal;
+    harnessTotal = totalHarnessCount > 0 ? totalHarnessCount : totals.replacements + totals.newDevices;
+  } else {
+    harnessUnknownTotal = 0;
+  }
+
   quantities = generated;
   uploadSummary = totals;
   uploadedVehicles = vehicles;
-  harnessTotal = totals.replacements + totals.newDevices;
+  if (Object.keys(harnessCountsByType).length === 0) {
+    harnessTotal = totals.replacements + totals.newDevices;
+  }
   renderUploadSummary();
   render();
 
@@ -568,7 +668,15 @@ function renderUploadSummary() {
     return;
   }
   summaryEl.textContent = 'Uploaded: ' + uploadSummary.total + ' vehicles (' + uploadSummary.upgrades + ' upgrades, ' + uploadSummary.replacements + ' replacements, ' + uploadSummary.newDevices + ' new devices).';
-  harnessEl.textContent = harnessTotal > 0 ? 'Expected harnesses: ' + harnessTotal + '. Select harness SKUs manually below.' : '';
+  if (harnessTotal > 0) {
+    var message = 'Expected harnesses: ' + harnessTotal + '. Select harness SKUs manually below.';
+    if (harnessUnknownTotal > 0) {
+      message += ' <span style="color:#f87171;font-weight:700">[' + harnessUnknownTotal + ' harnesses not matched – select manually]</span>';
+    }
+    harnessEl.innerHTML = message;
+  } else {
+    harnessEl.textContent = '';
+  }
 }
 
 function updateChipStyles() {
@@ -709,7 +817,7 @@ function changeQty(sku, delta) {
   render();
 }
 
-function resetQuantities() { quantities = {}; uploadSummary = null; uploadedVehicles = []; harnessTotal = 0; renderUploadSummary(); render(); }
+function resetQuantities() { quantities = {}; uploadSummary = null; uploadedVehicles = []; harnessTotal = 0; harnessUnknownTotal = 0; renderUploadSummary(); render(); }
 
 function updateSummary(filtered) {
   var items = filtered.filter(function(i) { return getEffectiveQty(i.sku) > 0; });
