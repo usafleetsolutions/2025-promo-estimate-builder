@@ -337,9 +337,17 @@
     "installType": "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)",
     "bundle": "Core, Go, Safety (Sensor), Safety Plus (Camera)"
   },
+  
   {
-    "product": "16-Pin OBDII Harness - BUNDLED",
-    "sku": "HRN-GS16K22-A",
+    "product": "Light Duty 16-Pin OBDII Harness - BUNDLED",
+    "sku": "HRN-GS16K2-LD",
+    "price": null,
+    "installType": "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)",
+    "bundle": "Core, Go, Safety (Sensor), Safety Plus (Camera)"
+  },
+  {
+    "product": "Heavy Duty 16-Pin OBDII Harness - BUNDLED",
+    "sku": "HRN-GS16K2-HD",
     "price": null,
     "installType": "Self Install, USAFS (install not ordered from GT), Geotab (Install ordered)",
     "bundle": "Core, Go, Safety (Sensor), Safety Plus (Camera)"
